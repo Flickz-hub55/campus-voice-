@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Voice | Student &amp; SUG Hub</title>
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Chart.js via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* Minor visual polish not achievable with pure Tailwind utility classes */
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 4px; }
+  .sidebar-scroll::-webkit-scrollbar { width: 6px; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- =====================================================================
+     AUTH VIEW — Sign Up / Log In (shown before authentication)
+     ===================================================================== -->
+<div id="auth-view" class="view min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Brand header -->
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-blue-700 text-white text-2xl font-bold mb-3">CV</div>
+      <h1 class="text-3xl font-bold text-gray-900">Campus Voice</h1>
+      <p class="text-gray-500 mt-1">Your campus hub — heard, handled, resolved.</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+      <!-- Auth toggle -->
+      <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+        <button onclick="toggleAuth('login')" id="loginToggleBtn" class="flex-1 py-2 rounded-md font-semibold text-sm bg-blue-700 text-white">Log In</button>
+        <button onclick="toggleAuth('signup')" id="signupToggleBtn" class="flex-1 py-2 rounded-md font-semibold text-sm text-gray-600">Sign Up</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form" onsubmit="login(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Matric Number / Email</label>
+          <input id="loginId" type="text" required placeholder="e.g. CSC/2021/045 or you@school.edu" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input id="loginPw" type="password" required placeholder="••••••••" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+        </div>
+        <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-md transition">Log In</button>
+        <p class="text-xs text-gray-400 text-center pt-1">SUG/Admin demo login: <span class="font-mono">admin</span> / <span class="font-mono">admin123</span></p>
+      </form>
+
+      <!-- SIGN UP FORM -->
+      <form id="signup-form" onsubmit="signup(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+          <input type="text" required placeholder="Jane Adeyemi" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Matric Number / Student ID</label>
+          <input type="text" required placeholder="CSC/2021/045" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" required placeholder="you@school.edu" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <input type="text" required placeholder="Computer Science" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Level</label>
+            <select required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+              <option>100</option><option>200</option><option>300</option><option>400</option><option>500</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input type="password" required placeholder="••••••••" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+          <input type="password" required placeholder="••••••••" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+        </div>
+        <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-md transition">Sign Up</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     STUDENT PORTAL VIEW
+     ===================================================================== -->
+<div id="student-view" class="view hidden min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar navigation -->
+  <aside class="bg-blue-700 text-white w-full md:w-64 md:min-h-screen flex-shrink-0">
+    <div class="flex items-center gap-2 px-5 py-5 border-b border-blue-600">
+      <div class="w-9 h-9 rounded-lg bg-white text-blue-700 flex items-center justify-center font-bold">CV</div>
+      <span class="text-lg font-bold">Campus Voice</span>
+    </div>
+    <nav class="p-3 flex md:flex-col overflow-x-auto md:overflow-visible sidebar-scroll gap-1">
+      <button onclick="showTab('student-view','sv-dashboard',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left bg-white text-blue-700 font-semibold">🏠 Dashboard</button>
+      <button onclick="showTab('student-view','sv-complaints',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">📝 Complaints</button>
+      <button onclick="showTab('student-view','sv-suggestions',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">💡 Suggestion Box</button>
+      <button onclick="showTab('student-view','sv-announcements',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">📢 Announcements</button>
+      <button onclick="showTab('student-view','sv-lostfound',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">🔍 Lost &amp; Found</button>
+      <button onclick="showTab('student-view','sv-marketplace',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">🛍 Marketplace</button>
+      <button onclick="showTab('student-view','sv-events',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">📅 Event Calendar</button>
+      <button onclick="showTab('student-view','sv-directory',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">📞 Directory</button>
+      <button onclick="showTab('student-view','sv-polls',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">📊 Polls &amp; Feedback</button>
+      <button onclick="showTab('student-view','sv-profile',this)" class="tab-btn whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left hover:bg-blue-600">👤 Profile</button>
+      <button onclick="logout()" class="whitespace-nowrap flex items-center gap-2 px-4 py-3 rounded-md w-full text-left text-blue-100 hover:bg-blue-800 mt-2 md:mt-4 border-t border-blue-600 md:border-t md:pt-4">↩ Log Out</button>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full">
+
+    <!-- ============ DASHBOARD TAB ============ -->
+    <section id="sv-dashboard" class="tab-content">
+      <h2 class="text-2xl font-bold text-gray-900 mb-1">Welcome back, Jane 👋</h2>
+      <p class="text-gray-500 mb-6">Here's what's happening around campus.</p>
+
+      <!-- Quick overview cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <p class="text-sm text-gray-500">My Complaints</p>
+          <p class="text-2xl font-bold text-blue-700">1</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <p class="text-sm text-gray-500">Suggestions Made</p>
+          <p class="text-2xl font-bold text-blue-700">2</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <p class="text-sm text-gray-500">Upcoming Events</p>
+          <p class="text-2xl font-bold text-blue-700">2</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <p class="text-sm text-gray-500">Unread Announcements</p>
+          <p class="text-2xl font-bold text-blue-700">4</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Recent announcements list -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
+          <h3 class="font-semibold text-gray-900 mb-3">Recent Announcements</h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex justify-between border-b border-gray-100 pb-2"><span>🚨 Emergency: Water outage in Block C</span><span class="text-gray-400">Today</span></li>
+            <li class="flex justify-between border-b border-gray-100 pb-2"><span>SUG General Assembly this Friday</span><span class="text-gray-400">Yesterday</span></li>
+            <li class="flex justify-between"><span>Semester exam timetable released</span><span class="text-gray-400">2 days ago</span></li>
+          </ul>
+        </div>
+        <!-- Complaint status summary -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
+          <h3 class="font-semibold text-gray-900 mb-3">Complaint Status Summary</h3>
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-medium">Pending: 0</span>
+            <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">In Review: 1</span>
+            <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">Resolved: 0</span>
+          </div>
+          <p class="text-sm text-gray-500 mt-4">Your complaint "Broken AC in Hostel Block B" is currently being reviewed by Student Affairs.</p>
+        </div>
+      </div>
+
+      <!-- Upcoming events list -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 mt-6">
+        <h3 class="font-semibold text-gray-900 mb-3">Upcoming Events</h3>
+        <ul class="space-y-2 text-sm">
+          <li class="flex justify-between"><span>🎤 SUG Town Hall Meeting</span><span class="text-gray-400">Aug 2 · 4:00 PM</span></li>
+          <li class="flex justify-between"><span>🏅 Inter-Faculty Sports Fiesta</span><span class="text-gray-400">Aug 9 · 9:00 AM</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ COMPLAINTS TAB ============ -->
+    <section id="sv-complaints" class="tab-content hidden">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Complaints</h2>
+
+      <!-- Submit Complaint form -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 mb-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Submit a Complaint</h3>
+        <form class="grid md:grid-cols-2 gap-4" onsubmit="event.preventDefault(); alert('Demo only — complaint not saved.');">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input type="text" required placeholder="Briefly describe the issue" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select id="complaintCategory" onchange="toggleOther(this)" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+              <option>Student Welfare</option>
+              <option>Academic Concerns</option>
+              <option>Hostel Issues</option>
+              <option>Campus Facilities</option>
+              <option>Security & Safety</option>
+              <option>Transportation</option>
+              <option>Health & Welfare</option>
+              <option>Cafeteria & Vendors</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div id="otherCategoryWrap" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Please specify</label>
+            <input type="text" placeholder="Specify category" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea rows="3" required placeholder="Provide details about the issue" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input type="text" placeholder="e.g. Hostel Block B, Room 14" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Upload Image</label>
+            <input type="file" class="w-full border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-700">
+          </div>
+          <div class="md:col-span-2">
+            <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 px-6 rounded-md transition">Submit Complaint</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- My Complaints table -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 mb-6 overflow-x-auto">
+        <h3 class="font-semibold text-gray-900 mb-4">My Complaints</h3>
+        <table class="w-full text-sm text-left">
+          <thead>
+            <tr class="border-b border-gray-200 text-gray-500">
+              <th class="py-2 pr-4">Title</th><th class="py-2 pr-4">Category</th><th class="py-2 pr-4">Date</th><th class="py-2 pr-4">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-100">
+              <td class="py-3 pr-4">Broken AC in Hostel Block B</td>
+              <td class="py-3 pr-4">Hostel Issues</td>
+              <td class="py-3 pr-4">Jul 20, 2026</td>
+              <td class="py-3 pr-4"><span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">In Review</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Complaint Status Tracker -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
+        <h3 class="font-semibold text-gray-900 mb-5">Complaint Status Tracker — "Broken AC in Hostel Block B"</h3>
+        <div class="flex items-center">
+          <div class="flex flex-col items-center flex-1">
+            <div class="w-9 h-9 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold">✓</div>
+            <span class="text-xs mt-2 font-medium text-gray-700">Pending</span>
+          </div>
+          <div class="flex-1 h-1 bg-blue-700"></div>
+          <div class="flex flex-col items-center flex-1">
+            <div class="w-9 h-9 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold">2</div>
+            <span class="text-xs mt-2 font-medium text-gray-700">In Review</span>
+          </div>
+          <div class="flex-1 h-1 bg-gray-200"></div>
+          <div class="flex flex-col items-center flex-1">
+            <div class="w-9 h-9 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold">3</div>
+            <span class="text-xs mt-2 font-medium text-gray-400">Resolved</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SUGGESTION BOX TAB ============ -->
+    <section id="sv-suggestions" class="tab-content hidden">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Suggestion Box</h2>
+
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5 mb-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Submit an Idea</h3>
+        <form class="space-y-4" onsubmit="event.preventDefault(); alert('Demo only — suggestion not saved.');">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input type="text" required placeholder="Sum up your idea" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea rows="3" required placeholder="Explain your idea in detail" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-700"></textarea>
+          </div>
+          <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 px-6 rounded-md transition">Submit Idea</button>
+        </form>
+      </div>
+
+      <h3 class="font-semibold text-gray-900 mb-3">Community Suggestions <span class="text-gray-400 font-normal text-sm">(sorted by votes)</span></h3>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-lg shadow-sm border-2 border-blue-700 p-5 relative">
+          <span class="absolute -top-3 left-4 bg-blue-700 text-white text-xs px-2 py-0.5 rounded-full font-semibold">Top 5</span>
+          <h4 class="font-semibold text-gray-900 mt-1">Extend library hours during exams</h4>
+          <p class="text-sm text-gray-500 mt-1">The library closes at 8PM even during exam week — extending to midnight would help a lot of us.</p>
+          <div class="flex items-center justify-between mt-4">
+            <button class="flex items-center gap-1 text-blue-700 font-semibold border border-blue-700 rounded-md px-3 py-1 text-sm hover:bg-blue-50">▲ Upvote</button>
+            <span class="text-sm text-gray-500 font-medium">128 votes</span>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
+          <h4 class="font-semibold text-gray-900">More charging points in the cafeteria</h4>
+          <p class="text-sm text-gray-
